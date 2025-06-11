@@ -1,4 +1,4 @@
-import os,requests,pandas
+import os,requests,pandas,io
 
 from FileManager import copy_file, delete_file, list_files_in_folder, create_new_file_in_folder, \
     create_new_folder_in_path, is_empty_folder, write_to_data_csv, read_1_row_from_data_csv, print_all_data_csv, \
@@ -175,7 +175,7 @@ def checkout_repo(path, version_hash_code):
     print("Analyze response:", response_analyze.text)
 """
 
-def push_repo(path):
+"""def push_repo(path):
     staging_path = wit_subfolder(path, "staging")
     if not is_empty_folder(staging_path):
         print("You must commit before pushing.")
@@ -202,4 +202,94 @@ def push_repo(path):
 
     # Close all file handles
     for _, (_, file_obj) in files_data:
-        file_obj.close()
+        file_obj.close()"""
+
+"""def push_repo(path):
+    staging_path = wit_subfolder(path, "staging")
+    if not is_empty_folder(staging_path):
+        print("You must commit before pushing.")
+        return
+
+    last_hash = last_hash_code_data_csv(path)
+    if not last_hash:
+        print("No commits to push.")
+        return
+
+    committed_path = os.path.join(wit_subfolder(path, "committed"), last_hash)
+    files = list_files_in_folder(committed_path)
+
+    files_data = []
+    file_blobs = []
+    for f in files:
+        file_path = os.path.join(committed_path, f)
+        with open(file_path, 'rb') as file_obj:
+            content = file_obj.read()
+            file_blobs.append((f, content))
+    for f, content in file_blobs:
+        files_data.append(('files', (f, io.BytesIO(content))))
+    files_data.append(('project_root', (None, str(path))))
+
+    # שליחה ל-alerts
+    response_alerts = requests.post(f"{URL}/alerts", files=files_data)
+    print("Alerts response:", response_alerts.text)
+
+    # שליחה ל-analyze (שוב, עם אותם תכנים)
+    response_analyze = requests.post(f"{URL}/analyze", files=files_data)
+    print("Analyze response:", response_analyze.text)
+"""
+    # files_data = []
+    # for f in files:
+    #     files_data.append(('files', (f, open(os.path.join(committed_path, f), 'rb'))))
+    # # Add project_root as a form field
+    # files_data.append(('project_root', (None, str(path))))
+    #
+    # print("Sending files to /alert________________________________")
+    # # for file_tuple in files_data:
+    # #     print(f"File: {file_tuple[0]}, Size: {len(file_tuple[1][1])} bytes")
+    # response_alerts = requests.post(f"{URL}/alerts", files=files_data)
+    # print("Alerts response:", response_alerts.text)
+    # print("Sending files to /analyze!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    # for file_tuple in files_data:
+    #     print(f"File: {file_tuple[0]}, Size: {len(file_tuple[1][1])} bytes")
+    # response_analyze = requests.post(f"{URL}/analyze", files=files_data)
+    # print("Analyze response:", response_analyze.text)
+    #
+    # for _, (_, file_obj) in files_data:
+    #     if hasattr(file_obj, "close"):
+    #         file_obj.close()
+
+
+import io
+
+def push_repo(path):
+    staging_path = wit_subfolder(path, "staging")
+    if not is_empty_folder(staging_path):
+        print("You must commit before pushing.")
+        return
+
+    last_hash = last_hash_code_data_csv(path)
+    if not last_hash:
+        print("No commits to push.")
+        return
+
+    committed_path = os.path.join(wit_subfolder(path, "committed"), last_hash)
+    files = list_files_in_folder(committed_path)
+    file_blobs = []
+    for f in files:
+        file_path = os.path.join(committed_path, f)
+        with open(file_path, 'rb') as file_obj:
+            content = file_obj.read()
+            file_blobs.append((f, content))
+
+    def make_files_data():
+        data = [('files', (f, io.BytesIO(content))) for f, content in file_blobs]
+        data.append(('project_root', (None, str(path))))
+        return data
+
+    # Send to /alerts
+    response_alerts = requests.post(f"{URL}/alerts", files=make_files_data())
+    print("Alerts response:", response_alerts.text)
+
+    # Send to /analyze (with new BytesIO objects)
+    response_analyze = requests.post(f"{URL}/analyze", files=make_files_data())
+    print("Analyze response:", response_analyze.text)
