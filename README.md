@@ -41,7 +41,7 @@ Make sure `wit.py` exists in that location.
 - Open **Environment Variables** → edit the `Path` variable  
 - Add:
 ```
-C:\Users\user1\Desktop\pythonProject
+C:\Users\user1\Desktop\pythonProject\.venv\Scripts
 ```
 
 Now you can run `wit` from any terminal window.
