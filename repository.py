@@ -1,0 +1,207 @@
+import os,requests,pandas,io
+from file_manager import create_new_folder_in_path,copy_file,delete_file,is_empty_folder,list_files_in_folder
+from commit import Commit
+from request_manager import get_last_commit_hash_from_server
+
+IGNORED_FILES = {"desktop.ini", "Thumbs.db", "ehthumbs.db", ".DS_Store"}
+IGNORED_FOLDERS = {".git", ".wit"}
+IGNORED_PREFIXES = {"~$"}
+IGNORED_EXTENSIONS = {".tmp", ".lnk"}
+
+URL='http://localhost:8000'
+
+#Used
+def should_ignore(name):
+    """
+    Returns True if the file or folder name should be ignored by the repository.
+    """
+    if name in IGNORED_FILES or name in IGNORED_FOLDERS:
+        return True
+    if any(name.startswith(prefix) for prefix in IGNORED_PREFIXES):
+        return True
+    if any(name.endswith(ext) for ext in IGNORED_EXTENSIONS):
+        return True
+    return False
+
+#Used
+def wit_subfolder(path, subfolder=""):
+    """
+    Returns the path to a subfolder inside the .wit directory.
+    If no subfolder is provided, returns the path to .wit itself.
+    """
+    if subfolder:
+        return os.path.join(path, ".wit", subfolder)
+    return os.path.join(path, ".wit")
+
+#Used
+def require_init(func):
+    """
+    Decorator that runs the function only if the repository is initialized.
+    """
+    def wrapper(path, *args, **kwargs):
+        if did_not_already_init(path):
+            return
+        return func(path, *args, **kwargs)
+    return wrapper
+
+#Used
+def did_not_already_init(path):
+    """
+    Returns True if the .wit repository is not initialized at the given path.
+    Prints an error message if the .wit directory is missing.
+    """
+    if not os.path.exists(wit_subfolder(path, "")):
+        print("fatal: not a wit repository (or any of the parent directories): .wit")
+        return True
+    return False
+
+#Used
+def init_repo(path):
+    """
+    Initializes a new Wit repository at the given path, creating required subfolders.
+    """
+    try:
+        create_new_folder_in_path(wit_subfolder(path))
+        create_new_folder_in_path(wit_subfolder(path, "committed"))
+        create_new_folder_in_path(wit_subfolder(path, "staging"))
+        print(f"Initialized empty Wit repository in {path}/.wit/")
+    except FileExistsError:
+        print(f"Reinitialized existing Wit repository in {path}.wit\\")
+
+#Used
+@require_init
+def add_repo(path, file_name):
+    """
+    Adds a file to the staging area if it exists and is not ignored.
+    """
+    if should_ignore(file_name):
+        return
+    file_path = os.path.join(path, file_name)
+    staging_path = wit_subfolder(path, "staging")
+    if os.path.exists(file_path):
+        copy_file(file_path, staging_path)
+        print(f"{file_name} file added successfully")
+    else:
+        print(f"fatal: pathspec '${file_name}' did not match any files")
+#Used
+@require_init
+def add_all_repo(path):
+    """
+    Adds all non-ignored files in the given path to the staging area.
+    """
+    staging_path = wit_subfolder(path, "staging")
+    for file_name in list_files_in_folder(path):
+        if should_ignore(file_name):
+            continue
+        copy_file(os.path.join(path, file_name), staging_path)
+        print(f"{file_name} file added successfully")
+
+
+@require_init
+def commit_repo(path, message):
+    wit_path = wit_subfolder(path, "")
+    staging_path = wit_subfolder(path, "staging")
+    committed_path = wit_subfolder(path, "committed")
+
+    if is_empty_folder(staging_path):
+        print("There is no need to commit until you have made an addition.")
+        return
+
+    commit = Commit(message)
+
+
+    create_new_folder_in_path(os.path.join(committed_path, commit.hash_code))
+
+    last_hash = get_last_commit_hash_from_server()
+    if last_hash is not None:
+        copy_from_path = os.path.join(committed_path, last_hash)
+    else:
+        copy_from_path = path
+
+    all_file_to_copy = list_files_in_folder(copy_from_path)
+    list_files_in_stage = list_files_in_folder(staging_path)
+
+    if all_file_to_copy is not None:
+        for f in all_file_to_copy:
+            if f not in list_files_in_stage and not should_ignore(f):
+                copy_file(os.path.join(copy_from_path, f), os.path.join(committed_path, commit.hash_code))
+
+    for file in list_files_in_stage:
+        if should_ignore(file):
+            continue
+        copy_file(os.path.join(staging_path, file), os.path.join(committed_path, commit.hash_code))
+        delete_file(os.path.join(staging_path, file))
+    commit_data = {
+        "hash_code": commit.hash_code,
+        "message": commit.message,
+        "timestamp": commit.timestamp  # Add this property to your Commit class if missing
+    }
+    try:
+        response = requests.post(f"{URL}/commits", json=commit_data)
+        if response.status_code == 200:
+            print(f"{len(list_files_in_stage)} file changed, {len(all_file_to_copy) - len(list_files_in_stage)} insertions(+), \n create new commit.\n id: {commit.hash_code}  {list_files_in_stage}")
+        else:
+            print(f"שגיאה בשמירת הקומיט ב־DB: {response.text}")
+    except Exception as e:
+            print(f"שגיאה בשמירת הקומיט ב־DB: {e}")
+
+@require_init
+def log_repo(path):
+    print_all_data_csv(path)
+
+@require_init
+def status_repo(path):
+    staging_path = wit_subfolder(path, "staging")
+    if is_empty_folder(staging_path):
+        print("No need to commit")
+        return
+    print("A commit is required.")
+
+@require_init
+def checkout_repo(path, version_hash_code):
+    committed_version_path = os.path.join(wit_subfolder(path, "committed"), version_hash_code)
+    if not is_valid_path(committed_version_path):
+        print(f"error: path spec $'{version_hash_code}' did not match any file(s) known to wit")
+        return
+    files = list_files_in_folder(committed_version_path)
+    for f in files:
+        if should_ignore(f):
+            continue
+        copy_file(os.path.join(committed_version_path, f), path)
+    print(f"Note: switching to {version_hash_code}.")
+
+
+import io
+@require_init
+def push_repo(path):
+    staging_path = wit_subfolder(path, "staging")
+    if not is_empty_folder(staging_path):
+        print("You must commit before pushing.")
+        return
+
+    last_hash = last_hash_code_data_csv(path)
+    if not last_hash:
+        print("No commits to push.")
+        return
+
+    committed_path = os.path.join(wit_subfolder(path, "committed"), last_hash)
+    files = list_files_in_folder(committed_path)
+    file_blobs = []
+    for f in files:
+        file_path = os.path.join(committed_path, f)
+        with open(file_path, 'rb') as file_obj:
+            content = file_obj.read()
+            file_blobs.append((f, content))
+
+    def make_files_data():
+        data = [('files', (f, io.BytesIO(content))) for f, content in file_blobs]
+        data.append(('project_root', (None, str(path))))
+        return data
+
+    # Send to /alerts
+    response_alerts = requests.post(f"{URL}/alerts", files=make_files_data())
+    print("Alerts response:", response_alerts.text)
+
+    # Send to /analyze (with new BytesIO objects)
+    response_analyze = requests.post(f"{URL}/analyze", files=make_files_data())
+    print("Analyze response:", response_analyze.text)

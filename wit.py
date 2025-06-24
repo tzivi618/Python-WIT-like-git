@@ -1,6 +1,6 @@
 import click
 
-from Repository import init_repo, add_repo, commit_repo, log_repo, status_repo, checkout_repo,push_repo, add_all_repo
+from repository import init_repo, add_repo, commit_repo, log_repo, status_repo, checkout_repo,push_repo, add_all_repo
 
 from pathlib import Path
 
@@ -26,17 +26,10 @@ def add(file_name):
     else:
         add_repo(path, file_name)
 
-"""@cli.command()
-@click.argument('message')
-def commit(message):
-    path = Path.cwd()
-    commit_repo(path, message)"""
 @cli.command()
 @click.option('-m', '--message', required=True, help='Commit message')
 def commit(message):
     path = Path.cwd()
-    print(message)
-    print(path)
     commit_repo(path, message)
 
 
