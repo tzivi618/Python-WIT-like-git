@@ -1,6 +1,3 @@
-כמובן! הנה תוכן מוכן לקובץ `README.md` עבור הפרויקט שלך:
-
-```markdown
 # wit — Simple Local Version Control
 
 **`wit`** is a lightweight, Git-inspired version control system implemented in Python.  
@@ -8,7 +5,7 @@ It supports basic versioning features and stores all commit data locally in CSV 
 
 ---
 
-## 🚀 Features
+##  Features
 
 - Initialize a repository with `wit init`
 - Add individual files or all files using `wit add <filename>` or `wit add .`
@@ -20,43 +17,40 @@ It supports basic versioning features and stores all commit data locally in CSV 
 
 ---
 
-## ⚙️ Setup Instructions
+##  Setup Instructions
 
-### 1. Clone the project folder
-For example:
+### 1. Clone the project folder  
+Example:
 ```
-
 C:\Users\user1\Desktop\pythonProject
-
-````
+```
 
 ### 2. Create a `.bat` launcher
 
 Create a file named `wit.bat` with the following content:
 
-```bat
+```
 @echo off
 python C:\Users\user1\Desktop\pythonProject\wit.py %*
-````
+```
 
-Make sure the Python file (`wit.py`) is located at that path.
+Make sure `wit.py` exists in that location.
 
-### 3. Add the .bat location to your system PATH
+### 3. Add the `.bat` location to your system PATH
 
-* Open *Environment Variables* → Edit the `Path` variable
-* Add:
+- Open **Environment Variables** → edit the `Path` variable  
+- Add:
+```
+C:\Users\user1\Desktop\pythonProject
+```
 
-  ```
-  C:\Users\user1\Desktop\pythonProject
-  ```
-
-Now, you can run `wit` from any command line window.
+Now you can run `wit` from any terminal window.
 
 ---
 
-## 🗂️ Directory Structure (After `wit init`)
+##  Directory Structure (After `wit init`)
 
-When you initialize a repository in any folder, a `.wit` folder will be created inside that folder:
+When you initialize a repository in any folder, a `.wit` folder will be created in that folder:
 
 ```
 .wit/
@@ -65,13 +59,13 @@ When you initialize a repository in any folder, a `.wit` folder will be created 
 └── data.csv
 ```
 
-> This structure is created inside the folder where `wit init` is executed.
+> This structure is created inside the folder where you ran `wit init`.
 
 ---
 
-## 💡 Usage Example
+##  Usage Example
 
-```bash
+```
 wit init
 wit add .
 wit commit -m "Initial commit"
@@ -82,26 +76,21 @@ wit checkout abc123def4
 
 ---
 
-## 📌 Notes
+##  Notes
 
-* The `.wit` repository is local to the directory where you ran `wit init`.
-* No external databases are used — everything is saved in a local CSV file.
-* Currently supports only top-level file tracking (no nested folders).
-
----
-
-## 🛠 Requirements
-
-* Python 3.9+
-* Click library (`pip install click`)
+- The `.wit` folder is local to the directory where `wit init` was executed.
+- No external database is used — data is stored locally in `data.csv`.
+- Only top-level file tracking is currently supported (not recursive in folders).
 
 ---
 
-## 🔗 License
+##  Requirements
+
+- Python 3.9+
+- Click library (`pip install click`)
+
+---
+
+##  License
 
 MIT License.
-
-```
-
-אם את רוצה שאארוז לך את זה לקובץ `README.md` להורדה או אוסיף קישורים/סקרינשוטים, תגידי לי.
-```
