@@ -1,96 +1,93 @@
-# wit — Simple Local Version Control
+# WIT – A Simple Version Control System
 
-**`wit`** is a lightweight, Git-inspired version control system implemented in Python.  
-It supports basic versioning features and stores all commit data locally in CSV format.
+This project is a simplified Git-like version control system implemented in Python.  
+It supports basic operations like `init`, `add`, `commit`, `log`, `status`, `checkout`, and `push`.
 
 ---
 
 ##  Features
 
-- Initialize a repository with `wit init`
-- Add individual files or all files using `wit add <filename>` or `wit add .`
-- Commit staged files with `wit commit -m "your message"`
-- View commit history with `wit log`
-- Check for changes with `wit status`
-- Switch to previous versions using `wit checkout <commit_hash>`
-- All commits are saved to a local `data.csv` inside `.wit`
+- Initialize a Wit repository anywhere on your machine.
+- Stage individual files or all files in the current folder.
+- Commit changes with messages.
+- View commit logs.
+- Check repository status.
+- Restore previous versions.
+- Push to a centralized backup (to be implemented in server).
 
 ---
 
-##  Setup Instructions
+##  Installation & Setup
 
-### 1. Clone the project folder  
-Example:
-```
-C:\Users\user1\Desktop\pythonProject
-```
+### 1. Clone the project
+Download or clone this repository to your local machine.
 
-### 2. Create a `.bat` launcher
-
-Create a file named `wit.bat` with the following content:
+### 2. Create a `.bat` shortcut for command-line usage  
+Create a file named `wit.bat` with the following content (adjust the path if needed):
 
 ```
 @echo off
 python C:\Users\user1\Desktop\pythonProject\wit.py %*
 ```
 
-Make sure `wit.py` exists in that location.
+Make sure the path to your actual `wit.py` file is correct.
 
-### 3. Add the `.bat` location to your system PATH
+### 3. Add Python and the `.bat` file to system PATH
 
-- Open **Environment Variables** → edit the `Path` variable  
-- Add:
-```
-C:\Users\user1\Desktop\pythonProject\.venv\Scripts
-```
+In your Windows environment variables (`System Properties > Environment Variables`), add the following paths to the `PATH` variable:
 
-Now you can run `wit` from any terminal window.
+- `C:\Users\user1\Desktop\pythonProject\.venv\Scripts`
+- The folder where your `wit.bat` file is saved.
 
----
-
-##  Directory Structure (After `wit init`)
-
-When you initialize a repository in any folder, a `.wit` folder will be created in that folder:
-
-```
-.wit/
-├── committed/
-├── staging/
-└── data.csv
-```
-
-> This structure is created inside the folder where you ran `wit init`.
+This allows you to run `wit` from any command prompt window.
 
 ---
 
-##  Usage Example
+##  Usage
 
-```
-wit init
-wit add .
-wit commit -m "Initial commit"
-wit status
-wit log
-wit checkout abc123def4
+Use the following commands from your terminal:
+
+```bash
+wit init               # Initialize a .wit folder
+wit add <file>         # Stage a specific file
+wit add .              # Stage all files in the current directory
+wit commit -m "msg"    # Commit with message
+wit log                # Show all commits
+wit status             # Show repo status
+wit checkout <hash>    # Restore files from a commit
+wit push               # Push current commit to server (if implemented)
 ```
 
 ---
 
 ##  Notes
 
-- The `.wit` folder is local to the directory where `wit init` was executed.
-- No external database is used — data is stored locally in `data.csv`.
-- Only top-level file tracking is currently supported (not recursive in folders).
+- The `.wit` folder is created in the current directory when running `wit init`.
+- Commits are stored in the `.wit/committed` directory.
+- Staged files are in `.wit/staging`.
+- All commit metadata is stored in a local `data.csv` file inside `.wit`.
 
 ---
 
-##  Requirements
+##  Example
 
-- Python 3.9+
-- Click library (`pip install click`)
+```bash
+wit init
+wit add my_script.py
+wit commit -m "Initial commit with basic script"
+wit log
+```
+
+---
+
+##  Technologies
+
+- Python 3.x
+- Standard libraries only (no external DB or dependencies)
+- Click – for CLI interface
 
 ---
 
 ##  License
 
-MIT License.
+This project is part of a student final project and is not intended for production use.
