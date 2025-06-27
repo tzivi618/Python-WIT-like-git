@@ -37,3 +37,7 @@ class CommitManager:
         """Prints all commits."""
         for commit in self.data.read_all():
             print(commit)
+
+    def get_all_commits(self) -> list[Commit]:
+        """Returns a list of all commits."""
+        return self.data.read_all()
