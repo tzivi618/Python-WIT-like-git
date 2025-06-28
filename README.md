@@ -97,5 +97,5 @@ This project was built for study and demo purposes only and is not recommended f
 ---
 
 ##  See also
-Server repo
+https://github.com/tzivi618/wit-server-py
 
