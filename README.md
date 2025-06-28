@@ -1,31 +1,31 @@
 # WIT – A Simple Version Control System
 
-This project is a simplified Git-like version control system implemented in Python.  
-It supports basic operations like `init`, `add`, `commit`, `log`, `status`, `checkout`, and `push`.
+This project is a Git-like version control system developed in Python.  
+Supports basic commands: `init`, `add`, `commit`, `log`, `status`, `checkout`, `push`, and also `analyze` for temporary analysis.
 
 ---
 
-##  Features
-
-- Initialize a Wit repository anywhere on your machine.
-- Stage individual files or all files in the current folder.
-- Commit changes with messages.
-- View commit logs.
+##  Main Features
+- Create a new Wit repository in any folder.
+- Staging of individual files or all files in the folder.
+- Create commits with messages.
+- View commit history.
 - Check repository status.
 - Restore previous versions.
-- Push to a centralized backup (to be implemented in server).
-
+- Send code to the server with `push`.
+- Temporary code analysis with `analyze`.
+- Save graphs and analysis results in the `results` folder.
 ---
 
 ##  Installation & Setup
 
 ### 1. Clone the project
-Download or clone this repository to your local machine.
+Clone or download the repository to your local machine.
 
-### 2. Create a `.bat` shortcut for command-line usage  
-Create a file named `wit.bat` with the following content (adjust the path if needed):
+### 2. Create a `.bat` file for command shortcuts
+Create a file named `wit.bat` with the following content (adjust the path):
 
-```
+```bat
 @echo off
 python C:\Users\user1\Desktop\pythonProject\wit.py %*
 ```
@@ -48,24 +48,26 @@ This allows you to run `wit` from any command prompt window.
 Use the following commands from your terminal:
 
 ```bash
-wit init               # Initialize a .wit folder
-wit add <file>         # Stage a specific file
-wit add .              # Stage all files in the current directory
-wit commit -m "msg"    # Commit with message
-wit log                # Show all commits
-wit status             # Show repo status
-wit checkout <hash>    # Restore files from a commit
-wit push               # Push current commit to server (if implemented)
+wit init               # Create a .wit folder for version control
+wit add <file>         # Add a file to staging
+wit add .              # Add all files in the current folder
+wit commit -m "msg"    # Create a commit with message
+wit log                # View commit history
+wit status             # Check repository status
+wit checkout <hash>    # Restore files from a specific commit
+wit push               # Send the latest commit to the server for analysis and graph generation
+wit analyze            # Temporary analysis only (without commit)
 ```
 
 ---
 
 ##  Notes
 
-- The `.wit` folder is created in the current directory when running `wit init`.
-- Commits are stored in the `.wit/committed` directory.
-- Staged files are in `.wit/staging`.
-- All commit metadata is stored in a local `data.csv` file inside `.wit`.
+- The  `.wit` older is created on the first run of `wit init`.
+- Commits are stored in `.wit/committed`.
+- Files waiting to be committed are in `.wit/staging`.
+- All commit metadata is saved locally in the `data.csv` file inside `.wit`.
+- Graphs and analysis results are saved in the `results` folder
 
 ---
 
@@ -74,8 +76,9 @@ wit push               # Push current commit to server (if implemented)
 ```bash
 wit init
 wit add my_script.py
-wit commit -m "Initial commit with basic script"
+wit commit -m "Initial commit with script"
 wit log
+wit push
 ```
 
 ---
@@ -83,11 +86,16 @@ wit log
 ##  Technologies
 
 - Python 3.x
-- Standard libraries only (no external DB or dependencies)
 - Click – for CLI interface
 
 ---
 
 ##  License
 
-This project is part of a student final project and is not intended for production use.
+This project was built for study and demo purposes only and is not recommended for production use.
+
+---
+
+##  See also
+Server repo
+
